@@ -53,8 +53,8 @@ const generateItems = ({
   return Array.from(Array(itemCount).keys()).map((index) => {
     return {
       i: index.toString(),
-      x: index * itemDimensions.x,
-      y: (index * itemDimensions.y) % columns,
+      x: (index % columns) * itemDimensions.x,
+      y: Math.floor(index / columns) * itemDimensions.y,
       w: itemDimensions.x,
       h: itemDimensions.y * 2,
     };
@@ -68,12 +68,11 @@ function App(): JSX.Element {
     itemDimensions: { x: 3, y: 3 },
   });
 
-  const innerLayout = [
-    { i: "1", x: 0, y: 0, w: 1, h: 2 },
-    { i: "2", x: 1, y: 0, w: 1, h: 2 },
-    { i: "3", x: 1, y: 1, w: 1, h: 2 },
-    { i: "4", x: 0, y: 1, w: 1, h: 2 },
-  ];
+  const innerLayout = generateItems({
+    columns: 2,
+    itemCount: 4,
+    itemDimensions: { x: 1, y: 1 },
+  });
 
   return (
     <div className="App">
