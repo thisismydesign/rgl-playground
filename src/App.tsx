@@ -16,14 +16,18 @@ const randomColor = () => {
 
 const NestableLayout: React.FunctionComponent<{
   layout: Layout[];
+  cols: number;
 }> = (props) => {
   return (
     <GridLayout
       className="layout"
       layout={props.layout}
-      cols={12}
-      rowHeight={30}
-      width={1200}
+      cols={props.cols}
+      rowHeight={20}
+      width={600}
+      onDragStart={(layout, oldItem, newItem, placeholder, e, element) => {
+        e.stopPropagation();
+      }}
     >
       {props.layout.map((item) => {
         return (
@@ -37,15 +41,35 @@ const NestableLayout: React.FunctionComponent<{
   );
 };
 
+const generateItems = ({
+  columns,
+  itemCount,
+  itemDimensions,
+}: {
+  columns: number;
+  itemCount: number;
+  itemDimensions: { x: number; y: number };
+}): Layout[] => {
+  return Array.from(Array(itemCount).keys()).map((index) => {
+    return {
+      i: index.toString(),
+      x: index * itemDimensions.x,
+      y: (index * itemDimensions.y) % columns,
+      w: itemDimensions.x,
+      h: itemDimensions.y * 2,
+    };
+  });
+};
+
 function App(): JSX.Element {
-  const outerLayout = [
-    { i: "1", x: 0, y: 0, w: 3, h: 6, static: true },
-    { i: "2", x: 1, y: 0, w: 3, h: 6, minW: 2, maxW: 4 },
-    { i: "3", x: 4, y: 0, w: 1, h: 2 },
-  ];
+  const outerLayout = generateItems({
+    columns: 3,
+    itemCount: 3,
+    itemDimensions: { x: 3, y: 3 },
+  });
 
   const innerLayout = [
-    { i: "1", x: 0, y: 0, w: 1, h: 1 },
+    { i: "1", x: 0, y: 0, w: 1, h: 2 },
     { i: "2", x: 1, y: 0, w: 1, h: 2 },
     { i: "3", x: 1, y: 1, w: 1, h: 2 },
     { i: "4", x: 0, y: 1, w: 1, h: 2 },
@@ -53,7 +77,12 @@ function App(): JSX.Element {
 
   return (
     <div className="App">
-      <NestableLayout layout={outerLayout} />
+      <NestableLayout
+        layout={outerLayout}
+        cols={outerLayout[0].w * outerLayout.length}
+      >
+        <NestableLayout layout={innerLayout} cols={9} />
+      </NestableLayout>
     </div>
   );
 }
